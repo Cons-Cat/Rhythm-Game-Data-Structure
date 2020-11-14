@@ -3,7 +3,7 @@
 	// Making branch null is a type-safe way to
 	// check if there exists an array or not.
 	// That is done in the Draw event.
-	branch = -4;
+	branch = null;
 	
 	// Notes have a flag that is toggled when they have
 	// been played. This prevents them from being

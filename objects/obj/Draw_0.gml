@@ -4,15 +4,16 @@ var staff_width = 80;
 
 function recurse_draw_notes(_staff_id, _depths, _position)
 {
-	// Stop recursing when hit null.
-	if (_staff_id == -4) { return; }
+	// Stop recursing when hit pointer_null.
+	if (_staff_id == pointer_null) { return; }
 	
-	// If the leaf has a null branch array,
+	// If the leaf has a pointer_null branch array,
 	// then it is a tail.
-	if (_staff_id.branch == -4)
+	if (_staff_id.branch == pointer_null)
 	{
-		show_debug_message("A")
-		draw_rectangle(_position * staff_width,
+		show_debug_message(_position)
+		draw_rectangle(
+			_position * staff_width,
 			room_height / 2,
 			_position * staff_width + 10,
 			room_height / 2 + 30,
@@ -29,9 +30,9 @@ function recurse_draw_notes(_staff_id, _depths, _position)
 
 // Recursively search through the next 4 staves
 // to find and render every note.
-//for (var i = 0; i < 4; i++)
+for (var i = 0; i < array_length(staff); i++)
 {
 	// Start at 1 depth and 2 beats ( half of 4, for 4:4 time )
-	recurse_draw_notes(staff[0], 1, 2);
+	recurse_draw_notes(staff[i], 1, 2);
 }
 show_debug_message(" ");

@@ -2,8 +2,8 @@
 {
 	// Stanzas contain an arbitrary list of notes.
 	// These are represented as an ** unbalanced binary search tree **.
-	branch_left = -4;
-	branch_right = -4;
+	branch_left = null;
+	branch_right = null;
 	
 	function make_tree (_depth)
 	{
