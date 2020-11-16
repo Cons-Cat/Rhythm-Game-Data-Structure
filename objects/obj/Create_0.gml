@@ -22,10 +22,6 @@ note_tail = function(_beat_length) constructor
 	beat_length = _beat_length;
 }
 
-add_node = array_create(2, pointer_invalid);
-add_node[0] = asset_get_index("scr_add_leaf");
-add_node[1] = asset_get_index("scr_add_tail")
-
 #endregion
 
 // Treat me like an adult.
@@ -40,7 +36,19 @@ current_staff = 0; // This is only used for playing.
 // I generate a random music track.
 random_set_seed(2);
 
-#region
+#region Generate Staff
+
+// This block is vestigial code from what I thought
+// would be a trivial optimization in any C-like
+// language. GML is 'special'.
+add_node = array_create(2, pointer_invalid);
+add_node[0] = asset_get_index("scr_add_leaf");
+add_node[1] = asset_get_index("scr_add_tail")
+
+// I'm going to move through each stanza
+// in 32th (2^-5) note increments. But
+// this would with any duration of notes
+stanza_length = 32;
 
 for (var i = 0; i < array_length(staff); i++)
 {
@@ -52,11 +60,6 @@ for (var i = 0; i < array_length(staff); i++)
 	// unless it gets some kind of assignment
 	// around here.
 	staff[0].branch[1] = 12;
-
-	// I'm going to move through this staff
-	// in 32th (2^-5) note increments. But
-	// this would with any duration of notes
-	var stanza_length = 32;
 
 	// I will assume this staff is 4:4 time.
 	// Thus, I loop at most 32 times.
@@ -99,16 +102,28 @@ for (var i = 0; i < array_length(staff); i++)
 			var new_node;
 			if (temp_place == j)
 			{
-				// beat_length is only passed in for drawing. It has
-				// no logical behavior in a note_tail. Storing the
-				// duration here is faster than discovering the
+				// beat_length is only passed in for drawing. It
+				// has no logical behavior in a note_tail. Storing
+				// the duration here is faster than discovering the
 				// duration while the music is being searched.
 				new_node = new note_tail(beat_length);
+
+				// Storing this value is the only reason why I wrote
+				// both a leaf and tail struct. Without this variable,
+				// they would be effectively identical.
 			} else {
 				new_node = new note_leaf();
-				show_debug_message (new_node);
 			}
-			//var new_node = script_execute(add_node[temp_place == j], beat_length);
+			
+			// In C++, it would be easy to inline two functions
+			// and branchlessly determine which type of node to
+			// instantiate. I do not have the minde to
+			// comprehend GML's galaxy brain language semantics
+			// and figure out how to do that here. I made this
+			// attempt:
+			//
+			//	var new_node = script_execute(add_node[temp_place == j], beat_length);
+			//
 
 			// Inserts into index [1] or [0].
 			cur_leaf.branch[ j >= temp_place ] = new_node;
@@ -123,7 +138,5 @@ for (var i = 0; i < array_length(staff); i++)
 		j += beat_length;
 	}
 }
-
-var foo = 0;
 
 #endregion
