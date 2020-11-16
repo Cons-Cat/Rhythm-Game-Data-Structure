@@ -28,7 +28,7 @@ gc_enable(false);
 
 // The staff is a fixed size array that represents an entire music track.
 // 200 is an arbitrary number of stanzas.
-staff = array_create(1);
+staff = array_create(4);
 
 current_staff = 0; // This is only used for playing.
 
@@ -55,6 +55,8 @@ add_node[1] = asset_get_index("scr_add_tail")
 
 for (var i = 0; i < array_length(staff); i++)
 {
+	show_debug_message("Stanza: " + string(i));
+
 	// Put a new stanza in the staff.
 	staff[i] = new note_leaf();
 
@@ -65,7 +67,7 @@ for (var i = 0; i < array_length(staff); i++)
 		// Generate a length for the beat.
 		// It can be anywhere between the end of the staff,
 		// and the current iterator.
-		var beat_length = power(2, irandom_range(1, 5));
+		var beat_length = min( power(2, irandom_range(1, 5)), power(2, log2(stanza_length - j)) );
 
 		var cur_leaf = staff[i];
 	
@@ -79,52 +81,65 @@ for (var i = 0; i < array_length(staff); i++)
 		// Idk if Game Maker VM will optimize semantically
 		// clear division, or if bitshifting is faster.
 		// On YYC, this is probably worse than / 2.
-		var temp_place = stanza_length << 1;
+		var temp_place = stanza_length >> 1;
 
 		// Bitshift Right then Load Immediate might
 		// be faster than this Load Address, Idk.
 		var half_place = temp_place;
 
-		if (rest_coeff)
+		//if (rest_coeff)
 		{
-			while (true)
-			//for (var k = 0; k < (depths - 1) * rest_coeff; k++)
+			//while (true)
+			for (var k = 0; k < log2(stanza_length); k++)
 			{
 				// If j is ahead of temp_place, ADD half_place.
 				// Otherwise, SUBTRACT half_place.
-				var half_place = half_place >> 1;
+				// ceil prevents half_place from being 0.
+				var half_place = ceil(half_place / 2);
+				//var half_place = half_place << 1;
 				temp_place +=
 					(((j >= temp_place) * 2) - 1)
 					* half_place;
 
-				// Determine whether the next node is a leaf or a tail.
-				var new_node;
-				if (temp_place == j)
+				if (cur_leaf.branch == pointer_null) { break; }
+				if (cur_leaf.branch[ j >= temp_place ] == pointer_null)
 				{
-					// beat_length is only passed in for drawing. It
-					// has no logical behavior in a note_tail. Storing
-					// the duration here is faster than discovering the
-					// duration while the music is being searched.
-					new_node = new note_tail(beat_length);
-					cur_leaf.branch[ j >= temp_place ] = new_node;					
-					break;
-				} else {
-					new_node = new note_leaf();
+					// Determine whether the next node is a leaf or a tail.
+					var new_node;
+					if (temp_place == j)
+					{
+						show_debug_message("  Posi: " + string(j));
+						show_debug_message("  Leng: " + string(beat_length));
+						show_debug_message("");
+
+						// beat_length is only passed in for drawing. It
+						// has no logical behavior in a note_tail. Storing
+						// the duration here is faster than discovering the
+						// duration while the music is being searched.
+						new_node = new note_tail(beat_length);
+						
+						// Inserts into index [1] or [0].
+						cur_leaf.branch[ j >= temp_place ] = new_node;					
+						break;
+					} else {
+						new_node = new note_leaf();
+
+						// Inserts into index [1] or [0].
+						cur_leaf.branch[ j >= temp_place ] = new_node;
+						cur_leaf = new_node;
+						continue;
+					}
+
+					// In C++, it would be easy to inline two functions
+					// and branchlessly determine which type of node to
+					// instantiate. I do not have the minde to
+					// comprehend GML's galaxy brain language semantics
+					// and figure out how to do that here. I made this
+					// attempt:
+					//
+					//	var new_node = script_execute(add_node[temp_place == j], beat_length);
+					//
 				}
-
-				// In C++, it would be easy to inline two functions
-				// and branchlessly determine which type of node to
-				// instantiate. I do not have the minde to
-				// comprehend GML's galaxy brain language semantics
-				// and figure out how to do that here. I made this
-				// attempt:
-				//
-				//	var new_node = script_execute(add_node[temp_place == j], beat_length);
-				//
-
-				// Inserts into index [1] or [0].
-				cur_leaf.branch[ j >= temp_place ] = new_node;
-				cur_leaf = new_node;
 			}
 		}
 		
