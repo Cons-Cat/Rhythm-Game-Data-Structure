@@ -77,72 +77,65 @@ for (var i = 0; i < array_length(staff); i++)
 		// it, since the absence of a leaf can be
 		// interpreted as a rest.
 		var rest_coeff = irandom(1); // 0 or 1.
-		
+
 		// Idk if Game Maker VM will optimize semantically
 		// clear division, or if bitshifting is faster.
 		// On YYC, this is probably worse than / 2.
 		var temp_place = stanza_length >> 1;
 
-		// Bitshift Right then Load Immediate might
+		// Bitshift Right + Load Immediate might
 		// be faster than this Load Address, Idk.
 		var half_place = temp_place;
 
-		//if (rest_coeff)
+		// Inserts into index [1] or [0].
+		var index = real(j >= temp_place);
+
+		for (var k = 0; k < log2(stanza_length) * rest_coeff; k++)
 		{
-			//while (true)
-			for (var k = 0; k < log2(stanza_length); k++)
+			// If j is ahead of temp_place, ADD half_place.
+			// Otherwise, SUBTRACT half_place.
+			// ceil prevents half_place from being 0.
+			var half_place = ceil(half_place / 2);
+			//var half_place = half_place << 1;
+			temp_place +=
+				(((index) * 2) - 1)
+				* half_place;
+
+			// Determine whether the next node is a leaf or a tail.
+			if (k + 1 < log2(stanza_length))
 			{
-				// If j is ahead of temp_place, ADD half_place.
-				// Otherwise, SUBTRACT half_place.
-				// ceil prevents half_place from being 0.
-				var half_place = ceil(half_place / 2);
-				//var half_place = half_place << 1;
-				temp_place +=
-					(((j >= temp_place) * 2) - 1)
-					* half_place;
-
-				if (cur_leaf.branch == pointer_null) { break; }
-				if (cur_leaf.branch[ j >= temp_place ] == pointer_null)
+				var new_node;
+				if (cur_leaf.branch[index] == pointer_null)
 				{
-					// Determine whether the next node is a leaf or a tail.
-					var new_node;
-					if (temp_place == j)
-					{
-						show_debug_message("  Posi: " + string(j));
-						show_debug_message("  Leng: " + string(beat_length));
-						show_debug_message("");
-
-						// beat_length is only passed in for drawing. It
-						// has no logical behavior in a note_tail. Storing
-						// the duration here is faster than discovering the
-						// duration while the music is being searched.
-						new_node = new note_tail(beat_length);
-						
-						// Inserts into index [1] or [0].
-						cur_leaf.branch[ j >= temp_place ] = new_node;					
-						break;
-					} else {
-						new_node = new note_leaf();
-
-						// Inserts into index [1] or [0].
-						cur_leaf.branch[ j >= temp_place ] = new_node;
-						cur_leaf = new_node;
-						continue;
-					}
-
-					// In C++, it would be easy to inline two functions
-					// and branchlessly determine which type of node to
-					// instantiate. I do not have the minde to
-					// comprehend GML's galaxy brain language semantics
-					// and figure out how to do that here. I made this
-					// attempt:
-					//
-					//	var new_node = script_execute(add_node[temp_place == j], beat_length);
-					//
+					new_node = new note_leaf();
+					cur_leaf.branch[index] = new_node;
 				}
+
+				cur_leaf = cur_leaf.branch[index];
+				continue;
+			} else {
+				show_debug_message("  Posi: " + string(j));
+				show_debug_message("  Leng: " + string(beat_length));
+				show_debug_message("");
+
+				// beat_length is only passed in for drawing. It
+				// has no logical behavior in a note_tail. Storing
+				// the duration here is faster than discovering the
+				// duration while the music is being searched.
+				cur_leaf.branch[index] = new note_tail(beat_length);
 			}
+			
+			// In C++, it would be easy to inline two functions
+			// and branchlessly determine which type of node to
+			// instantiate. I do not have the minde to
+			// comprehend GML's galaxy brain language semantics
+			// and figure out how to do that here. I made this
+			// attempt:
+			//
+			//	var new_node = script_execute(add_node[temp_place == j], beat_length);
+			//
 		}
-		
+
 		// This addition prevents notes in a single stanza from
 		// overlapping. Multiple stanzas should be used for over-
 		// lapping notes. I would recommend adding another layer
