@@ -6,19 +6,6 @@ note_leaf = function() constructor
 	// index [1] is the right leaf.
 	branch = array_create(2, pointer_null);
 	tail = pointer_null;
-
-	static recurse_instantiate_note_leaf = function(_depth)
-	{
-		// Each leaf points to two other leaves.
-		if (_depth < 5)
-		{
-			var next_depth = _depth + 1;
-			branch[0] = new note_leaf(next_depth);
-			branch[1] = new note_leaf(next_depth);
-		}
-		
-		return;
-	}
 }
 
 note_tail = function(_beat_length) constructor
@@ -52,7 +39,7 @@ for (var i = 0; i < array_length(staff); i++)
 {
 	// Put a new stanza in the staff.
 	staff[i] = new note_leaf();
-	staff[i].recurse_instantiate_note_leaf(5);
+	//staff[i].recurse_instantiate_note_leaf(5);
 	
 	// I'm going to move through this staff
 	// in 32th (2^-5) note increments.
@@ -98,32 +85,43 @@ for (var i = 0; i < array_length(staff); i++)
                                    //  half_place = temp_place
                                    // would do here.
 
-		for (var k = 1; k < (depths - 1) * rest_coeff; k++)
+		for (var k = 1; k < (depths - 0) * rest_coeff; k++)
 		{
 			// If j is ahead of temp_place, ADD half_place.
 			// Otherwise, SUBTRACT half_place.
+
+			// Idk if Game Maker VM will optimize semantically
+			// clear division, or if bitshifting is faster.
+			// On YYC, this is probably worse than /= 2.
 			var half_place = half_place >> 1;
 			temp_place +=
 				// Compute either 1 or -1.
-				(((j >= (temp_place + half_place)) * 2) - 1)
+				(((j > temp_place) * 2) - 1)
 				// +half_place or -half_place.
 				* half_place;
 
+			// Determine whether the next node is a leaf or a tail.
+			var new_node;
+			if (temp_place == j)
+			{
+				new_node = new note_tail(beat_length);
+			} else {
+				new_node = new note_leaf();
+			}
+
 			// Inserts into index [1] or [0].
-			if (cur_leaf.branch[ j >= temp_place ] == pointer_null) { break; }
-			cur_leaf = cur_leaf.branch[
+			cur_leaf.branch[
 				j >= temp_place
-			];
+			] = new_node;
+			
+			// 
+			cur_leaf = new_node;
 		}
 
 		// beat_length is only passed in for drawing. It has
 		// no logical behavior in a note_tail. Storing the
 		// duration here is faster than discovering the
 		// duration while the music is being searched.
-		if (rest_coeff != 0)
-		{
-			//cur_leaf.tail = new note_tail(beat_length);
-		}
 
 		// This addition prevents notes in a single stanza from
 		// overlapping. Multiple stanzas should be used for over-
