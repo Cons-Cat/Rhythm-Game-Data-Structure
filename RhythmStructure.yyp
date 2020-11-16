@@ -1,10 +1,7 @@
 {
   "resources": [
-    {"id":{"name":"scr_note_tail","path":"scripts/scr_note_tail/scr_note_tail.yy",},"order":2,},
-    {"id":{"name":"tree_search","path":"scripts/tree_search/tree_search.yy",},"order":3,},
-    {"id":{"name":"scr_note_leaf","path":"scripts/scr_note_leaf/scr_note_leaf.yy",},"order":0,},
-    {"id":{"name":"generate_staff_tree","path":"scripts/generate_staff_tree/generate_staff_tree.yy",},"order":4,},
-    {"id":{"name":"stanza","path":"scripts/stanza/stanza.yy",},"order":1,},
+    {"id":{"name":"scr_add_leaf","path":"scripts/scr_add_leaf/scr_add_leaf.yy",},"order":0,},
+    {"id":{"name":"scr_add_tail","path":"scripts/scr_add_tail/scr_add_tail.yy",},"order":1,},
     {"id":{"name":"obj","path":"objects/obj/obj.yy",},"order":0,},
     {"id":{"name":"Room1","path":"rooms/Room1/Room1.yy",},"order":0,},
   ],

@@ -6,7 +6,7 @@
     "path": "folders/Scripts.yy",
   },
   "resourceVersion": "1.0",
-  "name": "scr_note_leaf",
+  "name": "scr_add_tail",
   "tags": [],
   "resourceType": "GMScript",
 }

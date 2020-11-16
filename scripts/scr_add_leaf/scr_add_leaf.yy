@@ -6,7 +6,7 @@
     "path": "folders/Scripts.yy",
   },
   "resourceVersion": "1.0",
-  "name": "generate_staff_tree",
+  "name": "scr_add_leaf",
   "tags": [],
   "resourceType": "GMScript",
 }
