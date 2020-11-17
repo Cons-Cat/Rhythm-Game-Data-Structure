@@ -13,12 +13,18 @@ note_tail = function(_beat_length) constructor
 	// check if there exists an array or not.
 	// That is done in the Draw event.
 	branch = pointer_null;
-
-	// Notes have a flag that is toggled when they have
-	// been played. This prevents them from being
-	// played multiple times.
-	played = false;
+	// TODO: beat_length can be streamlined out.
 	beat_length = _beat_length;
+
+	// These are only used for drawing.
+	played = false;
+}
+
+note_draw = function(_beat_length, _position, _stanza) constructor
+{
+	beat_length = _beat_length;
+	position = _position;
+	stanza = _stanza;
 }
 
 #endregion
@@ -36,6 +42,7 @@ staff = array_create(4);
 // Interactive values.
 current_staff = 0;
 escape = false;
+draw_notes_list = ds_list_create();
 
 // I'm going to move through each stanza
 // in 32th (2^-5) note increments. But
@@ -66,24 +73,29 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 		// TODO: Delete nodes up the tree.
 
 		// End search, and move back down the tree.
-		return _prev_node;
-	} else {
+		//return _prev_node;
+	}
+	{
+	//} else {
 		// Recurse down the tree.
-		//if (_cur_pos >= _low_bound)
+		if (_cur_pos >= _low_bound)
 		{
 			if (_cur_node.branch[0] != pointer_null)
 			{
 				_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
 					ceil(_half / 2), _cur_node.branch[0], _stanza_len, _prev_node);
 			} else {
-				if _cur_pos + _half < _up_bound
+				if _cur_pos <= _up_bound
 				{
 					_cur_node.branch[0] = _prev_node;
+				} else {
+					_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
+						ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
 				}
 			}
 		}
 
-		//if ((_cur_pos + _half) <= _up_bound)
+		if ((_cur_pos + _half) <= _up_bound)
 		{
 			if (_cur_node.branch[1] != pointer_null)
 			{
@@ -93,6 +105,9 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 				if _cur_pos >= _low_bound
 				{
 					_cur_node.branch[1] = _prev_node;
+				} else {
+					_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
+						ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
 				}
 			}
 		}
@@ -186,6 +201,9 @@ for (var i = 0; i < array_length(staff); i++)
 				// Used for optimizing the tree size.
 				ds_list_add(temp_list_notes, j);
 				ds_list_add(temp_list_notes, cur_leaf.branch[index]);
+				
+				// This is just for drawing.
+				ds_list_add(draw_notes_list, new note_draw(beat_length, j, i));
 			}
 
 			// In C++, it would be easy to inline two functions
@@ -216,7 +234,7 @@ for (var i = 0; i < array_length(staff); i++)
 			temp_list_notes[| j],
 			temp_list_notes[| j]
 			+ temp_list_notes[| j+1].beat_length,
-			stanza_length,
+			stanza_length >> 1,
 			staff[i],                           // Search through the current stanza.
 			stanza_length,                      // Pass the stanza length in by value.
 			temp_list_notes[| j+1]              // Try to replace nodes with a reference to the current note.

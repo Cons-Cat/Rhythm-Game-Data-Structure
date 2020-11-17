@@ -1,40 +1,20 @@
-
-function recurse_draw_notes(_branch_id, _staff_ind, _position, _half)
+// Draw notes.
+draw_set_color(c_blue);
+for (var i = 0; i < ds_list_size(draw_notes_list); i++)
 {
-	// Stop recursing when hit pointer_null.
-	// This represents a rest beat.
-	if (_branch_id == pointer_null) { return; }
-	
-	// If the leaf has a pointer_null branch array,
-	// then it is a tail.
-	if (_branch_id.branch == pointer_null)
-	{
-		draw_rectangle(
-			_position + (_staff_ind * staff_width) + 1,
-			room_height / 2 - _position/2,
-			_position + (_staff_ind * staff_width)
-				+ _branch_id.beat_length * smallest_note_width,
-			room_height / 2 + _position/2 + 30,
-			true
-		);
-
-		// Stop recursing.
-		return;
-	}
-
-	recurse_draw_notes(_branch_id.branch[0], _staff_ind, _position, _half >> 1);
-	recurse_draw_notes(_branch_id.branch[1], _staff_ind, _position + _half, _half >> 1);
+	draw_rectangle(
+		draw_notes_list[| i].position * smallest_note_width + (draw_notes_list[| i].stanza * staff_width),
+		room_height / 2 - draw_notes_list[| i].position/2,
+		draw_notes_list[| i].position * smallest_note_width + (draw_notes_list[| i].stanza * staff_width)
+			+ draw_notes_list[| i].beat_length * smallest_note_width,
+		room_height / 2 + draw_notes_list[| i].position/2 + 30,
+		true
+	);
 }
-
-// Recursively search through the next 4 staves
-// to find and render every note.
+	
+// Draw staves.
+draw_set_color(c_red);
 for (var i = 0; i < array_length(staff); i++)
 {
-	// Draw notes.
-	draw_set_color(c_blue);
-	recurse_draw_notes(staff[i], i, 0, stanza_length);
-	
-	// Draw staves.
-	draw_set_color(c_red);
 	draw_line((i+1) * staff_width, room_height / 2 - 10, (i+1) * staff_width, room_height / 2 + 50);
 }
