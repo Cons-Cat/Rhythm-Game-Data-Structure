@@ -43,28 +43,33 @@ staff_width = smallest_note_width * stanza_length;
 
 // This is a lazy function to finish the tree.
 unbalance_tree_recurse = function(_cur_pos, _prev_pos, _next_pos,
-                                  _note_ref, _cur_node, _cur_depth, _staff_len)
+                                  _cur_node, _cur_depth, _stanza_len)
 {
-	if (_note_ref.branch == pointer_null) { return; }
-	var half_len = (_staff_len / power(2, _cur_depth));
+	// Terminate on a note.
+	if (_cur_node.branch == pointer_null) { return; }
+	
+	// This is inefficient.
+	var half_len = (_stanza_len / power(2, _cur_depth));
 
 	if (
 		(_cur_pos + half_len) < _next_pos
 		&& _cur_pos > _prev_pos
 	)
 	{
+		show_debug_message("AAA")
 		return;
 	} else {
-		if (_note_ref.branch[0] != pointer_null)
+		// If it works, I guess.
+		if (_cur_node.branch[0] != pointer_null)
 		{
 		unbalance_tree_recurse(_cur_pos,            _prev_pos, _next_pos,
-			_note_ref.branch[0], _cur_depth + 1, _staff_len);
+			_cur_node.branch[0], _cur_depth + 1, _stanza_len);
 		}
 
-		if (_note_ref.branch[1] != pointer_null)
+		if (_cur_node.branch[1] != pointer_null)
 		{
 		unbalance_tree_recurse(_cur_pos + half_len, _prev_pos, _next_pos,
-			_note_ref.branch[1], _cur_depth + 1, _staff_len);
+			_cur_node.branch[1], _cur_depth + 1, _stanza_len);
 		}
 	}
 }
@@ -87,7 +92,7 @@ for (var i = 0; i < array_length(staff); i++)
 
 	// Put a new stanza in the staff.
 	staff[i] = new note_leaf();
-	var temp_list_notes = ds_list_create();
+	var temp_list_posi = ds_list_create();
 	var temp_list_lengths = ds_list_create();
 
 	// I will assume this staff is 4:4 time.
@@ -140,11 +145,6 @@ for (var i = 0; i < array_length(staff); i++)
 				}
 
 				cur_leaf = cur_leaf.branch[index];
-				
-				if (i == 3)
-				{
-					var a = 9;
-				}
 				continue;
 			} else {
 				show_debug_message("  Posi: " + string(j));
@@ -156,7 +156,7 @@ for (var i = 0; i < array_length(staff); i++)
 				// the duration here is faster than discovering the
 				// duration while the music is being searched.
 				cur_leaf.branch[index] = new note_tail(beat_length);
-				ds_list_add(temp_list_notes, cur_leaf.branch[index]);
+				ds_list_add(temp_list_posi, j);
 				ds_list_add(temp_list_lengths, j + beat_length);
 			}
 			
@@ -181,13 +181,16 @@ for (var i = 0; i < array_length(staff); i++)
 
 	// This is about the part where I got tired
 	// and stopped considering efficiency. Sorry.
-	for (var j = 0; j < ds_list_size(temp_list_notes); j++)
+	for (var j = 0; j < ds_list_size(temp_list_posi); j++)
 	{
 		var prev_pos = temp_list_lengths[| j];
-		var next_pos = temp_list_lengths[| j+1];
+		var next_pos = temp_list_posi[| j+1];
 
-		unbalance_tree_recurse(0, prev_pos, next_pos, temp_list_notes[| j], staff[i], 1, stanza_length)
+		unbalance_tree_recurse(0, prev_pos, next_pos, staff[i], 1, stanza_length)
 	}
+
+	ds_list_destroy(temp_list_lengths);
+	ds_list_destroy(temp_list_posi);
 }
 
 #endregion
