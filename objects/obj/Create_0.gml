@@ -56,6 +56,7 @@ staff_width = smallest_note_width * stanza_length;
 #region
 
 // This is a lazy function to finish the tree.
+// I just want to finish this project hastily.
 optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
                                   _cur_node, _stanza_len, _prev_node)
 {
@@ -66,34 +67,16 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 	}
 
 	if (
-		(_cur_pos + _half) <= _up_bound
-		&& _cur_pos >= _low_bound
+		(_cur_pos + _half) == _up_bound
+		&& _cur_pos == _low_bound
 	)
 	{
 		// TODO: Delete nodes up the tree.
 
 		// End search, and move back down the tree.
-		//return _prev_node;
-	}
-	{
-	//} else {
+		return _prev_node;
+	} else {
 		// Recurse down the tree.
-		//if (_cur_pos >= _low_bound)
-		{
-			if (_cur_node.branch[0] != pointer_null)
-			{
-				_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
-					ceil(_half / 2), _cur_node.branch[0], _stanza_len, _prev_node);
-			} else {
-				if _cur_pos <= _up_bound
-				{
-					_cur_node.branch[0] = _prev_node;
-				} else {
-					_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
-						ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
-				}
-			}
-		}
 
 		if ((_cur_pos + _half) <= _up_bound)
 		{
@@ -102,25 +85,54 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 				_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
 					ceil(_half / 2), _cur_node.branch[1], _stanza_len, _prev_node);
 			} else {
-				if _cur_pos >= _low_bound
+				if (_cur_pos >= _low_bound)
+				//if (_cur_pos >= _low_bound)
 				{
 					_cur_node.branch[1] = _prev_node;
 				} else {
-					_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
-						ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
+					if (_half > 1)
+					{
+						if (_cur_pos <= _up_bound)
+						{
+							_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
+								ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
+						}
+					}
 				}
 			}
 		}
-
-		// Merge redundant branches.
-		if (_cur_node.branch[0] == _cur_node.branch[1])
+		//else
+		
+		if (_cur_pos <= _up_bound)
 		{
-			_cur_node = _cur_node.branch[0];
+			if (_cur_node.branch[0] != pointer_null)
+			{
+				_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
+					ceil(_half / 2), _cur_node.branch[0], _stanza_len, _prev_node);
+			} else {
+				//if _cur_pos <= _up_bound
+				if (_cur_pos >= _low_bound && _cur_pos + _half == _up_bound)
+				{
+					_cur_node.branch[0] = _prev_node;
+				} else {
+					if (_half > 1)
+					{
+						_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
+							ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
+					}
+				}
+			}
 		}
-
-		// Converge back down the tree.
-		return _cur_node;
 	}
+	
+	// Merge redundant branches.
+	if (_cur_node.branch[0] == _cur_node.branch[1])
+	{
+		_cur_node = _cur_node.branch[0];
+	}
+
+	// Converge back down the tree.
+	return _cur_node;
 }
 
 #endregion
