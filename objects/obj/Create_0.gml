@@ -78,7 +78,7 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 	{
 	//} else {
 		// Recurse down the tree.
-		if (_cur_pos >= _low_bound)
+		//if (_cur_pos >= _low_bound)
 		{
 			if (_cur_node.branch[0] != pointer_null)
 			{
@@ -110,6 +110,12 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 						ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
 				}
 			}
+		}
+
+		// Merge redundant branches.
+		if (_cur_node.branch[0] == _cur_node.branch[1])
+		{
+			_cur_node = _cur_node.branch[0];
 		}
 
 		// Converge back down the tree.
@@ -227,7 +233,7 @@ for (var i = 0; i < array_length(staff); i++)
 
 	// This is about the part where I got tired
 	// and stopped considering efficiency. Sorry.
-	for (var j = 0; j < (ds_list_size(temp_list_notes) >> 1) - 1; j += 2)
+	for (var j = 0; j < ds_list_size(temp_list_notes); j += 2)
 	{
 		optimize_tree_recurse(
 			0,                                  // Begin search at start of stanza.

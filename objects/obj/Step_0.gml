@@ -5,7 +5,8 @@ interactive_search = function(_cur_node, _cur_pos, _to_pos, _half)
 
 	if (_cur_node.branch == pointer_null)
 	{
-		show_debug_message("Found note " + string(_cur_node.beat_length) + " at pos " + string(_to_pos) + " from pos " + string(_cur_pos) + " in stanza " + string(play_stanza));
+		show_debug_message("Found note width " + string(_cur_node.beat_length) + "\n\tat pos " + string(_cur_pos) + " from cursor " + string(play_note) + " in stanza " + string(play_stanza));
+		show_debug_message(string(_cur_node));
 		escape = true;
 		return;
 	}
@@ -25,8 +26,7 @@ interactive_search = function(_cur_node, _cur_pos, _to_pos, _half)
 }
 
 play_stanza = mouse_x div staff_width;
-play_note = (mouse_x - (play_stanza * staff_width)) div smallest_note_width
-//show_debug_message (string(play_stanza) + ", " + string(play_note));
+play_note = (mouse_x - (play_stanza * staff_width)) div smallest_note_width;
 
 if (mouse_check_button_pressed(mb_left))
 {
