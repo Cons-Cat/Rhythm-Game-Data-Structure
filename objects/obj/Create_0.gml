@@ -81,31 +81,26 @@ for (var i = 0; i < array_length(staff); i++)
 		// Idk if Game Maker VM will optimize semantically
 		// clear division, or if bitshifting is faster.
 		// On YYC, this is probably worse than / 2.
-		var temp_place = stanza_length >> 1;
+		var temp_place = 0;
 
 		// Bitshift Right + Load Immediate might
 		// be faster than this Load Address, Idk.
-		var half_place = temp_place;
+		var half_place = stanza_length;
 
-		// Inserts into index [1] or [0].
-		var index = real(j >= temp_place);
-
-		for (var k = 1; k < log2(stanza_length) * rest_coeff; k++)
+		for (var k = 1; k <= log2(stanza_length) * rest_coeff; k++)
 		{
+			half_place = ceil(half_place / 2);
 			
-			index = real(j >= temp_place);
-			
+			// Inserts into index [1] or [0].
+			var index = j >= (temp_place + half_place);
+				
 			// If j is ahead of temp_place, ADD half_place.
 			// Otherwise, SUBTRACT half_place.
 			// ceil prevents half_place from being 0.
-			half_place = ceil(half_place / 2);
-			//half_place = half_place << 1;
-			temp_place +=
-				(((index) * 2) - 1)
-				* half_place;
+			temp_place += (index * half_place);
 
 			// Determine whether the next node is a leaf or a tail.
-			if (k + 1 < log2(stanza_length))
+			if (k < log2(stanza_length))
 			{
 				var new_node;
 				if (cur_leaf.branch[index] == pointer_null)
@@ -149,7 +144,7 @@ for (var i = 0; i < array_length(staff); i++)
 		// lapping notes. I would recommend adding another layer
 		// to this data structure, a ds_list of stanzas, for
 		// every index in the staff to get that behavior.
-		j += (beat_length - 1);
+		j += beat_length ;
 	}
 }
 
