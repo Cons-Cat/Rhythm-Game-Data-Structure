@@ -18,6 +18,9 @@ note_tail = function(_beat_length) constructor
 
 	// These are only used for drawing.
 	played = false;
+	//asd = irandom(2);
+	
+	debug_id = irandom(100);
 }
 
 note_draw = function(_beat_length, _position, _stanza) constructor
@@ -67,8 +70,8 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 	}
 
 	if (
-		(_cur_pos + _half) == _up_bound
-		&& _cur_pos == _low_bound
+		(_cur_pos + _half) <= _up_bound
+		&& _cur_pos >= _low_bound
 	)
 	{
 		// TODO: Delete nodes up the tree.
@@ -92,11 +95,8 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 				} else {
 					if (_half > 1)
 					{
-						if (_cur_pos <= _up_bound)
-						{
-							_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
-								ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
-						}
+						_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
+							ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
 					}
 				}
 			}

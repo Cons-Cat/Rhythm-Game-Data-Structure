@@ -5,7 +5,7 @@ interactive_search = function(_cur_node, _cur_pos, _to_pos, _half)
 
 	if (_cur_node.branch == pointer_null)
 	{
-		show_debug_message("Found note width " + string(_cur_node.beat_length) + "\n\tat pos " + string(_cur_pos) + " from cursor " + string(play_note) + " in stanza " + string(play_stanza));
+		show_debug_message("Found note width " + string(_cur_node.beat_length) + "\n\tat pos " + " from cursor " + string(play_note) + " in stanza " + string(play_stanza));
 		show_debug_message(string(_cur_node));
 		escape = true;
 		_cur_node.played = !_cur_node.played;
