@@ -41,6 +41,34 @@ stanza_length = 32;
 smallest_note_width = 2; // 2 is an arbitrary number.
 staff_width = smallest_note_width * stanza_length;
 
+// This is a lazy function to finish the tree.
+unbalance_tree_recurse = function(_cur_pos, _prev_pos, _next_pos,
+                                  _note_ref, _cur_node, _cur_depth, _staff_len)
+{
+	if (_note_ref.branch == pointer_null) { return; }
+	var half_len = (_staff_len / power(2, _cur_depth));
+
+	if (
+		(_cur_pos + half_len) < _next_pos
+		&& _cur_pos > _prev_pos
+	)
+	{
+		return;
+	} else {
+		if (_note_ref.branch[0] != pointer_null)
+		{
+		unbalance_tree_recurse(_cur_pos,            _prev_pos, _next_pos,
+			_note_ref.branch[0], _cur_depth + 1, _staff_len);
+		}
+
+		if (_note_ref.branch[1] != pointer_null)
+		{
+		unbalance_tree_recurse(_cur_pos + half_len, _prev_pos, _next_pos,
+			_note_ref.branch[1], _cur_depth + 1, _staff_len);
+		}
+	}
+}
+
 // I generate a random music track.
 random_set_seed(2);
 
@@ -59,6 +87,8 @@ for (var i = 0; i < array_length(staff); i++)
 
 	// Put a new stanza in the staff.
 	staff[i] = new note_leaf();
+	var temp_list_notes = ds_list_create();
+	var temp_list_lengths = ds_list_create();
 
 	// I will assume this staff is 4:4 time.
 	// Thus, I loop at most 32 times.
@@ -126,6 +156,8 @@ for (var i = 0; i < array_length(staff); i++)
 				// the duration here is faster than discovering the
 				// duration while the music is being searched.
 				cur_leaf.branch[index] = new note_tail(beat_length);
+				ds_list_add(temp_list_notes, cur_leaf.branch[index]);
+				ds_list_add(temp_list_lengths, j + beat_length);
 			}
 			
 			// In C++, it would be easy to inline two functions
@@ -144,7 +176,17 @@ for (var i = 0; i < array_length(staff); i++)
 		// lapping notes. I would recommend adding another layer
 		// to this data structure, a ds_list of stanzas, for
 		// every index in the staff to get that behavior.
-		j += beat_length ;
+		j += beat_length;
+	}
+
+	// This is about the part where I got tired
+	// and stopped considering efficiency. Sorry.
+	for (var j = 0; j < ds_list_size(temp_list_notes); j++)
+	{
+		var prev_pos = temp_list_lengths[| j];
+		var next_pos = temp_list_lengths[| j+1];
+
+		unbalance_tree_recurse(0, prev_pos, next_pos, temp_list_notes[| j], staff[i], 1, stanza_length)
 	}
 }
 
