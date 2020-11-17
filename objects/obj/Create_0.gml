@@ -90,13 +90,16 @@ for (var i = 0; i < array_length(staff); i++)
 		// Inserts into index [1] or [0].
 		var index = real(j >= temp_place);
 
-		for (var k = 0; k < log2(stanza_length) * rest_coeff; k++)
+		for (var k = 1; k < log2(stanza_length) * rest_coeff; k++)
 		{
+			
+			index = real(j >= temp_place);
+			
 			// If j is ahead of temp_place, ADD half_place.
 			// Otherwise, SUBTRACT half_place.
 			// ceil prevents half_place from being 0.
-			var half_place = ceil(half_place / 2);
-			//var half_place = half_place << 1;
+			half_place = ceil(half_place / 2);
+			//half_place = half_place << 1;
 			temp_place +=
 				(((index) * 2) - 1)
 				* half_place;
@@ -112,6 +115,11 @@ for (var i = 0; i < array_length(staff); i++)
 				}
 
 				cur_leaf = cur_leaf.branch[index];
+				
+				if (i == 3)
+				{
+					var a = 9;
+				}
 				continue;
 			} else {
 				show_debug_message("  Posi: " + string(j));
@@ -141,7 +149,7 @@ for (var i = 0; i < array_length(staff); i++)
 		// lapping notes. I would recommend adding another layer
 		// to this data structure, a ds_list of stanzas, for
 		// every index in the staff to get that behavior.
-		j += beat_length;
+		j += (beat_length - 1);
 	}
 }
 
