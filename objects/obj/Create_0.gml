@@ -37,7 +37,8 @@ gc_enable(false);
 
 // The staff is a fixed size array that represents an entire music track.
 // 200 is an arbitrary number of stanzas.
-staff = array_create(4);
+staff_length = 4;
+staff = array_create(staff_length);
 
 // Interactive values.
 escape = false;
