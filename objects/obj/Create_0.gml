@@ -18,9 +18,6 @@ note_tail = function(_beat_length) constructor
 
 	// These are only used for drawing.
 	played = false;
-	//asd = irandom(2);
-	
-	debug_id = irandom(100);
 }
 
 note_draw = function(_beat_length, _position, _stanza) constructor
@@ -33,7 +30,7 @@ note_draw = function(_beat_length, _position, _stanza) constructor
 #endregion
 
 // I generate a random music track.
-random_set_seed(2);
+randomize();
 
 // I am an adult.
 gc_enable(false);
@@ -69,62 +66,58 @@ optimize_tree_recurse = function(_cur_pos, _low_bound, _up_bound, _half,
 		return _cur_node;
 	}
 
-	if (
-		(_cur_pos + _half) <= _up_bound
-		&& _cur_pos >= _low_bound
-	)
+	// Recurse down the tree.
+	if ((_cur_pos + _half) <= _up_bound)
 	{
-		// TODO: Delete nodes up the tree.
-
-		// End search, and move back down the tree.
-		return _prev_node;
-	} else {
-		// Recurse down the tree.
-
-		if ((_cur_pos + _half) <= _up_bound)
+		if (_cur_node.branch[1] != pointer_null)
 		{
-			if (_cur_node.branch[1] != pointer_null)
+			_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
+				ceil(_half / 2), _cur_node.branch[1], _stanza_len, _prev_node);
+		} else {
+			if (_half > 1)
 			{
 				_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
-					ceil(_half / 2), _cur_node.branch[1], _stanza_len, _prev_node);
+					ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
 			} else {
-				if (_cur_pos >= _low_bound)
-				//if (_cur_pos >= _low_bound)
+				if (_cur_pos >= _low_bound && _cur_pos + _half <= _up_bound)
 				{
-					_cur_node.branch[1] = _prev_node;
-				} else {
-					if (_half > 1)
-					{
-						_cur_node.branch[1] = optimize_tree_recurse(_cur_pos + _half, _low_bound, _up_bound,
-							ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
-					}
-				}
-			}
-		}
-		//else
-		
-		if (_cur_pos <= _up_bound)
-		{
-			if (_cur_node.branch[0] != pointer_null)
-			{
-				_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
-					ceil(_half / 2), _cur_node.branch[0], _stanza_len, _prev_node);
-			} else {
-				//if _cur_pos <= _up_bound
-				if (_cur_pos >= _low_bound && _cur_pos + _half == _up_bound)
-				{
-					_cur_node.branch[0] = _prev_node;
-				} else {
-					if (_half > 1)
-					{
-						_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
-							ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
-					}
+					_cur_node = _prev_node;
 				}
 			}
 		}
 	}
-	
+		
+	if (_cur_node.branch == pointer_null)
+	{
+		return _cur_node;
+	}
+		
+	if (_cur_pos <= _up_bound)
+	{
+		if (_cur_node.branch[0] != pointer_null)
+		{
+			_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
+				ceil(_half / 2), _cur_node.branch[0], _stanza_len, _prev_node);
+		} else {
+			if (_half > 1)
+			{
+				_cur_node.branch[0] = optimize_tree_recurse(_cur_pos, _low_bound, _up_bound,
+					ceil(_half / 2), new note_leaf(), _stanza_len, _prev_node);
+			} else {
+				if (_cur_pos >= _low_bound && _cur_pos + _half <= _up_bound)
+				{
+					_cur_node = _prev_node;
+				}
+			}
+		}
+	}
+		
+	// Terminate on a note.
+	if (_cur_node.branch == pointer_null)
+	{
+		return _cur_node;
+	}
+
 	// Merge redundant branches.
 	if (_cur_node.branch[0] == _cur_node.branch[1])
 	{
