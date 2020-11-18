@@ -1,13 +1,13 @@
 // Hacky gameplay
 interactive_search = function(_cur_node, _cur_pos, _to_pos, _half)
 {
+	iterations++;
 	if (escape) { return; }
 
 	if (_cur_node.branch == pointer_null)
 	{
-		show_debug_message("Found note width " + string(_cur_node.beat_length) + "\n\tat pos " + " from cursor " + string(play_note) + " in stanza " + string(play_stanza));
-		show_debug_message(string(_cur_node));
 		escape = true;
+		isNote = true;
 		_cur_node.played = !_cur_node.played;
 
 		return;
@@ -34,7 +34,10 @@ if (mouse_check_button_pressed(mb_left))
 {
 	if (play_stanza < array_length(staff))
 	{
+		iterations = 0;
 		escape = false;
+		isNote = false;
 		interactive_search(staff[play_stanza], 0, play_note, stanza_length >> 1);
+		show_message("Found " + (isNote ? "note" : "rest") + " in " + string(iterations) + " steps.");
 	}
 }

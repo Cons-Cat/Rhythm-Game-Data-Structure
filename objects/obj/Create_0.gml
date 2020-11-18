@@ -40,9 +40,10 @@ gc_enable(false);
 staff = array_create(4);
 
 // Interactive values.
-current_staff = 0;
 escape = false;
 draw_notes_list = ds_list_create();
+iterations = 0;
+isNote = false;
 
 // I'm going to move through each stanza
 // in 32th (2^-5) note increments. But
